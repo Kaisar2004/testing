@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Chart, registerables} from "chart.js";
+import 'chartjs-adapter-date-fns';
 import {FormsModule} from "@angular/forms";
-
 Chart.register(...registerables);
 
 @Component({
@@ -13,40 +13,37 @@ Chart.register(...registerables);
   templateUrl: './myChart.component.html',
   styleUrl: './myChart.component.css'
 })
-export class MyChartComponent implements OnInit {
-
-  ngOnInit(): void {
-    this.renderChart();
-  }
-
-  renderChart() {
-    const data = {
-      labels: [
-        'Red',
-        'Blue',
-        'Yellow'
-      ],
+export class MyChartComponent {
+  private myChart: any = new Chart('myChart', {
+    type: "line",
+    data: {
+      labels: [],
       datasets: [{
-        // label: 'My First Dataset',
-        data: [300, 50, 100],
-        backgroundColor: [
-          'rgb(255, 99, 132)',
-          'rgb(54, 162, 235)',
-          'rgb(255, 205, 86)'
-        ],
-        hoverOffset: 4
+        label: 'Data',
+        data: [],
       }]
-    };
-    const myChart = new Chart('myChart', {
-      type: "pie",
-      data: data,
-    });
-    const inputValue = (document.getElementById('newDate') as HTMLInputElement).value;
-  }
+    },
+    options: {
+      scales: {
+        x: {
+          type: 'time',
+          time: {
+            unit: 'day',
+          }
+        },
+        y: {
+          beginAtZero: true,
+        }
+      }
+    }
+  });
 
   onSubmit(dataInput: string) {
-    if (dataInput) {
-      console.log(dataInput);
+    if (dataInput.length !== 0) {
+      const splitData = dataInput.split('-').join('');
+      this.myChart.config.data.labels.push(splitData);
+      this.myChart.config.data.datasets[0].data.push(Math.floor(Math.random() * 30))
+      this.myChart.update();
     }
   }
 }
