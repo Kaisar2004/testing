@@ -9,3 +9,19 @@
 .data-container {
   margin: 20px;
 }
+
+button {
+  padding: 5px;
+  background-color: #BFF3;
+  margin-right: 15px;
+  margin-left: 15px;
+  width: 80px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid;
+}
+
+button:last-child {
+  margin-right: 0;
+  margin-left: 0;
+}

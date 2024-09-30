@@ -2,6 +2,7 @@
   <form>
     <input type="date" #newDate>
     <button (click)="setDataToChart(newDate.value)">Set</button>
+    <button (click)="combineDataOfChart(newDate.value)">Combine</button>
   </form>
 </div>
 
@@ -10,4 +11,5 @@
   <canvas id="myChart2"></canvas>
   <canvas id="myChart3"></canvas>
   <canvas id="myChart4"></canvas>
+  <canvas id="myChart5"></canvas>
 </div>
