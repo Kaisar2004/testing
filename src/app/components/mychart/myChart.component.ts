@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Chart, registerables} from "chart.js";
 import 'chartjs-adapter-date-fns';
 import {FormsModule} from "@angular/forms";
+import {CommonModule} from "@angular/common";
 
 Chart.register(...registerables);
 
@@ -9,112 +10,77 @@ Chart.register(...registerables);
   selector: 'app-myChart',
   standalone: true,
   imports: [
-    FormsModule
+    FormsModule,
+    CommonModule,
   ],
   templateUrl: './myChart.component.html',
   styleUrl: './myChart.component.css'
 })
 export class MyChartComponent {
+  public chartIds: string[] = [];
+  private chartIndex: number = 1;
+  private charts: Chart[] = [];
+  private maxCharts: number = 4;
 
-  private myChart1: Chart = new Chart('myChart1', {
-    type: "line",
-    data: {
-      labels: [] as string[],     // Массив строк
-      datasets: [{
-        label: "Sensor",
-        data: [] as number[],     // Массив чисел
-      }]
-    },
-    options: {
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'day',
-          }
-        },
-        y: {
-          beginAtZero: true,
-        }
-      }
+  createNextChart() {
+    if (this.charts.length >= this.maxCharts) {
+      alert('Достигнуто максимальное количество графиков');
+      return; // Выходим из функции, если достигли лимита
     }
-  });
-  private myChart2: Chart = new Chart('myChart2', {
-    type: "line",
-    data: {
-      labels: [] as string[],     // Массив строк
-      datasets: [{
-        label: "Sensor",
-        data: [] as number[],     // Массив чисел
-      }]
-    },
-    options: {
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'day',
-          }
+    // Генерируем уникальный ID для нового графика
+    const newChartId = `myChart${this.chartIndex}`;
+    this.chartIds.push(newChartId);
+
+    setTimeout(() => {
+      this.createChart(newChartId); // Создаем график с этим ID
+    });
+
+    this.chartIndex++;
+  }
+
+  createChart(chartId: string) {
+    const ctx = document.getElementById(chartId) as HTMLCanvasElement;
+    if (ctx) {
+      const sensorIndex = this.charts.length + 1;
+      const newChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [] as string[], // Массив строк для меток
+          datasets: [
+            {
+              label: `Sensor ${sensorIndex}`,
+              data: [] as number[], // Массив чисел для данных
+            },
+          ],
         },
-        y: {
-          beginAtZero: true,
-        }
-      }
-    }
-  });
-  private myChart3: Chart = new Chart('myChart3', {
-    type: "line",
-    data: {
-      labels: [] as string[],     // Массив строк
-      datasets: [{
-        label: "Sensor",
-        data: [] as number[],     // Массив чисел
-      }]
-    },
-    options: {
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'day',
-          }
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'day',
+              },
+            },
+            y: {
+              beginAtZero: true,
+            },
+          },
         },
-        y: {
-          beginAtZero: true,
-        }
-      }
+      });
+
+      this.charts.push(newChart);
     }
-  });
-  private myChart4: Chart = new Chart('myChart4', {
-    type: "line",
-    data: {
-      labels: [] as string[],     // Массив строк
-      datasets: [{
-        label: "Sensor",
-        data: [] as number[],     // Массив чисел
-      }]
-    },
-    options: {
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'day',
-          }
-        },
-        y: {
-          beginAtZero: true,
-        }
-      }
-    }
-  });
+  }
+
 
   setDataToChart(dataInput: string) {
     if (dataInput.length !== 0) {
       const splitData: string = dataInput.replace(/-/g, '');
-      const charts = [this.myChart1, this.myChart2, this.myChart3, this.myChart4];
+      // const charts = [this.myChart1, this.myChart2, this.myChart3, this.myChart4];
 
-      charts.forEach(chart => {
+      this.charts.forEach(chart => {
         const randomValue: number = Math.floor(Math.random() * 30);
 
         chart?.data.datasets[0].data.push(randomValue);
@@ -125,30 +91,25 @@ export class MyChartComponent {
   };
 
   combineDataOfChart(dataInput: string) {
-    const combinedData = [...this.myChart1.config.data.datasets ?? [], ...this.myChart2.config.data.datasets ?? []];
-    const combinedLabels = [...this.myChart1.config.data.labels ?? [], ...this.myChart2.config.data.labels ?? []];
+    if (this.charts.length < 2) {
+      console.log("Недостаточно графиков для объединения.");
+      return;
+    }
+    const combinedData = [
+      ...this.charts[0].config.data.datasets ?? [],
+      ...this.charts[1].config.data.datasets ?? []
+    ];
+
+    const combinedLabels = [
+      ...this.charts[0].config.data.labels ?? [],
+      ...this.charts[1].config.data.labels ?? []
+    ];
 
     if (dataInput.length !== 0) {
-      const newChart = new Chart('myChart5', {
-        type: "line",
-        data: {
-          datasets: combinedData,
-          labels: combinedLabels,
-        },
-        options: {
-          scales: {
-            x: {
-              type: 'time',
-              time: {
-                unit: 'day',
-              }
-            },
-            y: {
-              beginAtZero: true,
-            }
-          }
-        },
-      });
+      this.charts[0].config.data.datasets = combinedData;
+      this.charts[0].config.data.labels = combinedLabels;
+
+      this.charts[0].update();
     }
   };
 }
