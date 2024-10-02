@@ -72,29 +72,40 @@ export class MyChartComponent {
 
       this.charts.push(newChart);
     }
-  }
+  };
 
 
   setDataToChart(dataInput: string) {
     if (dataInput.length !== 0) {
       const splitData: string = dataInput.replace(/-/g, '');
-      // const charts = [this.myChart1, this.myChart2, this.myChart3, this.myChart4];
 
       this.charts.forEach(chart => {
         const randomValue: number = Math.floor(Math.random() * 30);
 
-        chart?.data.datasets[0].data.push(randomValue);
-        chart?.data?.labels?.push(splitData);
-        chart?.update();
+        chart.data.datasets[0].data.push(randomValue);
+        chart.data?.labels?.push(splitData);
+        chart.update();
+
+        if (this.charts[0].data.datasets.length == 2) {
+          this.charts[0]?.config?.data?.labels?.splice(0, this.charts[0]?.config?.data?.labels?.length);
+
+          this.charts[0].config.data.labels = [
+            ...this.charts[0].config.data.labels ?? [],
+            ...this.charts[1].config.data.labels ?? []
+          ];
+
+          this.charts[0].update();
+        }
       });
     }
   };
 
   combineDataOfChart(dataInput: string) {
     if (this.charts.length < 2) {
-      console.log("Недостаточно графиков для объединения.");
+      alert("Недостаточно графиков для объединения.");
       return;
     }
+
     const combinedData = [
       ...this.charts[0].config.data.datasets ?? [],
       ...this.charts[1].config.data.datasets ?? []
